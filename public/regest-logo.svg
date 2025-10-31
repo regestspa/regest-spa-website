@@ -1,0 +1,26 @@
+<svg width="320" height="320" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="blue-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#60A5FA;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="orange-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FB923C;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FBBF24;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="green-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10B981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#34D399;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Letter R with gradient -->
+  <text x="50%" y="45%" font-family="Arial, sans-serif" font-size="180" font-weight="bold" fill="url(#blue-gradient)" text-anchor="middle" dominant-baseline="middle">R</text>
+
+  <!-- Curved swoosh effect -->
+  <path d="M 80 200 Q 160 180 240 220" stroke="url(#orange-gradient)" stroke-width="12" fill="none" stroke-linecap="round"/>
+  <path d="M 80 230 Q 160 210 240 250" stroke="url(#green-gradient)" stroke-width="10" fill="none" stroke-linecap="round"/>
+
+  <!-- REGEST text below -->
+  <text x="50%" y="85%" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white" text-anchor="middle" letter-spacing="8">REGEST</text>
+</svg>
