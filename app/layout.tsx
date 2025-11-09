@@ -2,7 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { Providers } from '@/components/providers/Providers';
 
 export const metadata: Metadata = {
   title: 'REGEST - Gestión Empresarial',
@@ -17,11 +17,11 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className="font-sans antialiased">
-        <AuthProvider>
+        <Providers>
           {children}
           <Toaster />
           <Sonner />
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   );
