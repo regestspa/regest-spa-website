@@ -1,12 +1,28 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Bot, Calculator, Sparkles, ArrowRight } from "lucide-react";
+import { Bot, Calculator, Sparkles, ArrowRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "@/components/auth/AuthModal";
 
 export function ProductosORO() {
+  const { user } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showCalculator, setShowCalculator] = useState(false);
+
+  const handleCalculatorAccess = () => {
+    if (user) {
+      setShowCalculator(true);
+    } else {
+      setShowAuthModal(true);
+    }
+  };
+
   return (
     <section
       id="productos-oro"
@@ -136,18 +152,12 @@ export function ProductosORO() {
 
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button
+                    onClick={handleCalculatorAccess}
                     className="flex-1 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white rounded-full shadow-lg shadow-orange-500/50 hover:shadow-xl hover:shadow-orange-600/50 transform hover:scale-105 transition-all"
                     size="lg"
                   >
-                    Ver demo
+                    {user ? "Ver demo" : "Iniciar sesión para ver demo"}
                     <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="flex-1 border-2 border-orange-500 text-orange-400 hover:bg-orange-950/30 rounded-full hover:shadow-lg transition-all"
-                    size="lg"
-                  >
-                    Solicitar acceso
                   </Button>
                 </div>
               </CardContent>
@@ -155,6 +165,30 @@ export function ProductosORO() {
           </motion.div>
         </div>
       </div>
+
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => setShowCalculator(true)}
+      />
+
+      <Dialog open={showCalculator} onOpenChange={setShowCalculator}>
+        <DialogContent className="max-w-7xl w-full h-[90vh] p-0 bg-black border-orange-500/30">
+          <div className="relative w-full h-full">
+            <Button
+              onClick={() => setShowCalculator(false)}
+              className="absolute top-4 right-4 z-50 bg-orange-600 hover:bg-orange-700 rounded-full w-10 h-10 p-0"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+            <iframe
+              src="https://statuesque-scone-fcdb4f.netlify.app/"
+              className="w-full h-full rounded-lg"
+              title="Calculadora Tributaria REGEST"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
