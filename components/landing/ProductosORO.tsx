@@ -2,22 +2,20 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Bot, Calculator, Sparkles, ArrowRight, X } from "lucide-react";
+import { Bot, Calculator, Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 
 export function ProductosORO() {
   const { user } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showCalculator, setShowCalculator] = useState(false);
 
   const handleCalculatorAccess = () => {
     if (user) {
-      setShowCalculator(true);
+      window.open("https://statuesque-scone-fcdb4f.netlify.app/", "_blank", "noopener,noreferrer");
     } else {
       setShowAuthModal(true);
     }
@@ -169,26 +167,11 @@ export function ProductosORO() {
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        onSuccess={() => setShowCalculator(true)}
+        onSuccess={() => {
+          setShowAuthModal(false);
+          window.open("https://statuesque-scone-fcdb4f.netlify.app/", "_blank", "noopener,noreferrer");
+        }}
       />
-
-      <Dialog open={showCalculator} onOpenChange={setShowCalculator}>
-        <DialogContent className="max-w-7xl w-full h-[90vh] p-0 bg-black border-orange-500/30">
-          <div className="relative w-full h-full">
-            <Button
-              onClick={() => setShowCalculator(false)}
-              className="absolute top-4 right-4 z-50 bg-orange-600 hover:bg-orange-700 rounded-full w-10 h-10 p-0"
-            >
-              <X className="h-5 w-5" />
-            </Button>
-            <iframe
-              src="https://statuesque-scone-fcdb4f.netlify.app/"
-              className="w-full h-full rounded-lg"
-              title="Calculadora Tributaria REGEST"
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
     </section>
   );
 }
