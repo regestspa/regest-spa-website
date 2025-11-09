@@ -20,21 +20,33 @@ interface UserSubscription {
   status: string;
   started_at: string;
   expires_at: string | null;
+  is_trial: boolean;
+  trial_start_date: string | null;
+  trial_end_date: string | null;
+}
+
+interface AccessCode {
+  code: string;
+  expires_at: string;
+  last_sent_at: string;
 }
 
 export function useSubscription() {
   const { user } = useAuth();
   const [subscription, setSubscription] = useState<UserSubscription | null>(null);
+  const [accessCode, setAccessCode] = useState<AccessCode | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) {
       setSubscription(null);
+      setAccessCode(null);
       setLoading(false);
       return;
     }
 
     fetchSubscription();
+    fetchAccessCode();
   }, [user]);
 
   const fetchSubscription = async () => {
@@ -47,6 +59,9 @@ export function useSubscription() {
           status,
           started_at,
           expires_at,
+          is_trial,
+          trial_start_date,
+          trial_end_date,
           plan:subscription_plans(
             id,
             name,
@@ -72,13 +87,46 @@ export function useSubscription() {
     }
   };
 
+  const fetchAccessCode = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("access_codes")
+        .select("code, expires_at, last_sent_at")
+        .eq("user_id", user?.id)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      setAccessCode(data);
+    } catch (error) {
+      console.error("Error fetching access code:", error);
+      setAccessCode(null);
+    }
+  };
+
+  const isTrialActive = () => {
+    if (!subscription || !subscription.is_trial) return false;
+    if (!subscription.trial_end_date) return false;
+
+    const now = new Date();
+    const trialEnd = new Date(subscription.trial_end_date);
+
+    return now < trialEnd;
+  };
+
   const hasRegestbotAccess = () => {
     if (!subscription) return false;
+
+    if (isTrialActive()) return true;
+
     return subscription.plan.regestbot_access;
   };
 
   const hasCalculatorAccess = () => {
     if (!subscription) return false;
+
+    if (isTrialActive()) return true;
+
     return subscription.plan.calculator_access;
   };
 
@@ -87,12 +135,27 @@ export function useSubscription() {
     return subscription.plan.name === "Premium";
   };
 
+  const getDaysRemaining = () => {
+    if (!subscription || !subscription.trial_end_date) return 0;
+
+    const now = new Date();
+    const trialEnd = new Date(subscription.trial_end_date);
+    const diff = trialEnd.getTime() - now.getTime();
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+    return days > 0 ? days : 0;
+  };
+
   return {
     subscription,
+    accessCode,
     loading,
     hasRegestbotAccess,
     hasCalculatorAccess,
     isPremium,
+    isTrialActive,
+    getDaysRemaining,
     refetch: fetchSubscription,
+    refetchCode: fetchAccessCode,
   };
 }

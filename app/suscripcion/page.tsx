@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Check, Sparkles, ArrowLeft, AlertCircle, Edit2 } from "lucide-react";
+import { Check, Sparkles, ArrowLeft, AlertCircle, Edit2, Copy, RefreshCw, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/use-subscription";
 import { Navbar } from "@/components/landing/Navbar";
@@ -30,13 +30,14 @@ interface Plan {
 export default function SubscriptionPage() {
   const router = useRouter();
   const { user, profile, updateProfile } = useAuth();
-  const { subscription, loading: subLoading, refetch } = useSubscription();
+  const { subscription, accessCode, loading: subLoading, refetch, refetchCode, isTrialActive, getDaysRemaining } = useSubscription();
   const { toast } = useToast();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [whatsapp, setWhatsapp] = useState("");
   const [isEditingWhatsapp, setIsEditingWhatsapp] = useState(false);
   const [savingWhatsapp, setSavingWhatsapp] = useState(false);
+  const [regeneratingCode, setRegeneratingCode] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -106,6 +107,7 @@ export default function SubscriptionPage() {
         .update({
           plan_id: planId,
           status: "active",
+          is_trial: false,
           updated_at: new Date().toISOString(),
         })
         .eq("user_id", user?.id);
@@ -124,6 +126,57 @@ export default function SubscriptionPage() {
         title: "Error",
         description: "No se pudo actualizar tu suscripción.",
         variant: "destructive",
+      });
+    }
+  };
+
+  const handleRegenerateCode = async () => {
+    try {
+      setRegeneratingCode(true);
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("No session");
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-access-code`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${session.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ action: "regenerate" }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to regenerate code");
+
+      const result = await response.json();
+
+      toast({
+        title: "Código regenerado",
+        description: `Tu nuevo código es: ${result.code}. En producción se enviaría por WhatsApp al ${result.whatsapp} y al correo ${result.email}`,
+      });
+
+      refetchCode();
+    } catch (error) {
+      console.error("Error regenerating code:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo regenerar el código.",
+        variant: "destructive",
+      });
+    } finally {
+      setRegeneratingCode(false);
+    }
+  };
+
+  const copyCodeToClipboard = () => {
+    if (accessCode) {
+      navigator.clipboard.writeText(accessCode.code);
+      toast({
+        title: "Código copiado",
+        description: "El código ha sido copiado al portapapeles.",
       });
     }
   };
@@ -167,6 +220,74 @@ export default function SubscriptionPage() {
               Selecciona el plan que mejor se ajuste a tus necesidades
             </p>
           </motion.div>
+
+          {isTrialActive() && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="mb-8"
+            >
+              <Alert className="bg-gradient-to-r from-orange-950/40 to-amber-950/40 border-orange-500/50">
+                <Clock className="h-4 w-4 text-orange-500" />
+                <AlertTitle className="text-white font-bold">Prueba Gratuita de 7 Días</AlertTitle>
+                <AlertDescription className="text-gray-300">
+                  Tienes acceso completo a REGESTBOT y la Calculadora Tributaria. Te quedan {getDaysRemaining()} días de prueba.
+                  {accessCode && (
+                    <div className="mt-3 p-3 bg-black/30 rounded-lg">
+                      <p className="text-sm text-gray-400 mb-2">Tu código de acceso:</p>
+                      <div className="flex items-center gap-2">
+                        <code className="text-xl font-bold text-orange-400 tracking-wider">{accessCode.code}</code>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={copyCodeToClipboard}
+                          className="text-orange-500 hover:text-orange-400"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={handleRegenerateCode}
+                          disabled={regeneratingCode}
+                          className="text-orange-500 hover:text-orange-400"
+                        >
+                          <RefreshCw className={`h-4 w-4 ${regeneratingCode ? 'animate-spin' : ''}`} />
+                        </Button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Expira el: {new Date(accessCode.expires_at).toLocaleDateString('es-ES', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                    </div>
+                  )}
+                </AlertDescription>
+              </Alert>
+            </motion.div>
+          )}
+
+          {!isTrialActive() && subscription?.is_trial && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="mb-8"
+            >
+              <Alert className="bg-red-950/30 border-red-500/50">
+                <AlertCircle className="h-4 w-4 text-red-500" />
+                <AlertTitle className="text-white font-bold">Prueba Gratuita Expirada</AlertTitle>
+                <AlertDescription className="text-gray-300">
+                  Tu período de prueba ha finalizado. Actualiza a Premium para continuar accediendo a REGESTBOT.
+                </AlertDescription>
+              </Alert>
+            </motion.div>
+          )}
 
           {(!profile?.whatsapp || profile.whatsapp.length < 8) && (
             <motion.div

@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export function ProductosORO() {
   const { user } = useAuth();
-  const { hasRegestbotAccess, hasCalculatorAccess, loading } = useSubscription();
+  const { hasRegestbotAccess, hasCalculatorAccess, loading, isTrialActive, getDaysRemaining } = useSubscription();
   const { toast } = useToast();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authPurpose, setAuthPurpose] = useState<"calculator" | "regestbot">("calculator");
@@ -27,8 +27,8 @@ export function ProductosORO() {
 
     if (!hasRegestbotAccess()) {
       toast({
-        title: "Suscripción requerida",
-        description: "Necesitas una suscripción Premium para acceder a REGESTBOT.",
+        title: "Acceso Premium requerido",
+        description: "Tu período de prueba ha finalizado. Actualiza a Premium para continuar accediendo a REGESTBOT.",
         variant: "destructive",
       });
       return;
@@ -123,6 +123,14 @@ export function ProductosORO() {
                   </ul>
                 </div>
 
+                {user && isTrialActive() && (
+                  <div className="mb-3 p-3 bg-gradient-to-r from-orange-950/30 to-amber-950/30 border border-orange-500/30 rounded-xl">
+                    <p className="text-sm text-orange-400 font-semibold">
+                      Prueba gratuita: {getDaysRemaining()} días restantes
+                    </p>
+                  </div>
+                )}
+
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button
                     onClick={handleRegestbotAccess}
@@ -131,9 +139,9 @@ export function ProductosORO() {
                     size="lg"
                   >
                     {!user ? (
-                      <>Iniciar sesión <ArrowRight className="ml-2 h-4 w-4" /></>
+                      <>Registrarse y probar gratis <ArrowRight className="ml-2 h-4 w-4" /></>
                     ) : !hasRegestbotAccess() ? (
-                      <><Lock className="mr-2 h-4 w-4" /> Premium requerido</>
+                      <><Lock className="mr-2 h-4 w-4" /> Actualizar a Premium</>
                     ) : (
                       <>Abrir REGESTBOT <ArrowRight className="ml-2 h-4 w-4" /></>
                     )}
