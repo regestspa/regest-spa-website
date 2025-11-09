@@ -36,7 +36,7 @@ export function Contacto() {
     }
 
     const whatsappText = `Hola soy ${formData.nombre} (${formData.email}) Tel: ${formData.telefono || 'No proporcionado'} Mensaje: ${formData.mensaje}`;
-    const whatsappUrl = `https://wa.me/56948675503?text=${encodeURIComponent(whatsappText)}`;
+    const whatsappUrl = `https://wa.me/56982218271?text=${encodeURIComponent(whatsappText)}`;
 
     window.open(whatsappUrl, '_blank');
 
@@ -192,7 +192,7 @@ export function Contacto() {
                   <div>
                     <h3 className="font-semibold text-white mb-1">WhatsApp</h3>
                     <a
-                      href="https://wa.me/56948675503"
+                      href="https://wa.me/56982218271"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-orange-500 hover:underline hover:text-orange-600 transition-colors"

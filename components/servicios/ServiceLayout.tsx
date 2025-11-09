@@ -370,7 +370,7 @@ export function ServiceLayout({
               style={{ backgroundColor: themeColors.primary }}
             >
               <a
-                href="https://wa.me/56948675503"
+                href="https://wa.me/56982218271"
                 target="_blank"
                 rel="noopener noreferrer"
               >
