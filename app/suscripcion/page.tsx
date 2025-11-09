@@ -3,10 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Check, Sparkles, ArrowLeft } from "lucide-react";
+import { Check, Sparkles, ArrowLeft, AlertCircle, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/use-subscription";
 import { Navbar } from "@/components/landing/Navbar";
@@ -26,11 +29,14 @@ interface Plan {
 
 export default function SubscriptionPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, profile, updateProfile } = useAuth();
   const { subscription, loading: subLoading, refetch } = useSubscription();
   const { toast } = useToast();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [whatsapp, setWhatsapp] = useState("");
+  const [isEditingWhatsapp, setIsEditingWhatsapp] = useState(false);
+  const [savingWhatsapp, setSavingWhatsapp] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -39,6 +45,42 @@ export default function SubscriptionPage() {
     }
     fetchPlans();
   }, [user]);
+
+  useEffect(() => {
+    if (profile) {
+      setWhatsapp(profile.whatsapp || "");
+    }
+  }, [profile]);
+
+  const handleSaveWhatsapp = async () => {
+    if (!whatsapp || whatsapp.length < 8) {
+      toast({
+        title: "Error",
+        description: "Por favor ingresa un número de WhatsApp válido (mínimo 8 caracteres).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSavingWhatsapp(true);
+    const { error } = await updateProfile(whatsapp);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar tu número de WhatsApp.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "WhatsApp actualizado",
+        description: "Tu número de WhatsApp ha sido actualizado exitosamente.",
+      });
+      setIsEditingWhatsapp(false);
+    }
+
+    setSavingWhatsapp(false);
+  };
 
   const fetchPlans = async () => {
     try {
@@ -126,18 +168,96 @@ export default function SubscriptionPage() {
             </p>
           </motion.div>
 
-          {subscription && (
+          {(!profile?.whatsapp || profile.whatsapp.length < 8) && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="mb-8 p-4 bg-orange-950/30 border border-orange-500/30 rounded-lg text-center"
+              className="mb-8"
             >
-              <p className="text-white">
-                Plan actual: <span className="font-bold text-orange-500">{subscription.plan.name}</span>
-              </p>
+              <Alert className="bg-orange-950/30 border-orange-500/50">
+                <AlertCircle className="h-4 w-4 text-orange-500" />
+                <AlertDescription className="text-white">
+                  Por favor completa tu número de WhatsApp para continuar. Lo necesitamos para brindarte un mejor servicio.
+                </AlertDescription>
+              </Alert>
             </motion.div>
           )}
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mb-8"
+          >
+            <Card className="bg-gray-900/50 border-orange-500/30">
+              <CardHeader>
+                <CardTitle className="text-white">Mi Información</CardTitle>
+                <CardDescription className="text-gray-400">
+                  {subscription && (
+                    <>Plan actual: <span className="font-bold text-orange-500">{subscription.plan.name}</span></>
+                  )}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-gray-300">Email</Label>
+                  <Input
+                    value={user.email || ""}
+                    disabled
+                    className="bg-gray-800 border-gray-700 text-gray-400"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-gray-300">WhatsApp</Label>
+                    {!isEditingWhatsapp && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsEditingWhatsapp(true)}
+                        className="text-orange-500 hover:text-orange-400"
+                      >
+                        <Edit2 className="h-4 w-4 mr-1" />
+                        Editar
+                      </Button>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      value={whatsapp}
+                      onChange={(e) => setWhatsapp(e.target.value)}
+                      placeholder="+56 9 1234 5678"
+                      disabled={!isEditingWhatsapp}
+                      className="bg-gray-800 border-gray-700 text-white disabled:text-gray-400"
+                    />
+                    {isEditingWhatsapp && (
+                      <>
+                        <Button
+                          onClick={handleSaveWhatsapp}
+                          disabled={savingWhatsapp}
+                          className="bg-orange-600 hover:bg-orange-700"
+                        >
+                          {savingWhatsapp ? "Guardando..." : "Guardar"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setIsEditingWhatsapp(false);
+                            setWhatsapp(profile?.whatsapp || "");
+                          }}
+                          className="border-gray-700"
+                        >
+                          Cancelar
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500">Incluye código de país (ej. +56 para Chile)</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {plans.map((plan, index) => {

@@ -19,6 +19,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   const { signIn, signUp } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -40,9 +41,15 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!whatsapp || whatsapp.length < 8) {
+      toast.error("Por favor ingresa un número de WhatsApp válido");
+      return;
+    }
+
     setLoading(true);
 
-    const { error } = await signUp(email, password);
+    const { error } = await signUp(email, password, whatsapp);
 
     if (error) {
       toast.error(error.message);
@@ -121,6 +128,20 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                   required
                   className="bg-gray-800 border-gray-700 text-white"
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="signup-whatsapp" className="text-gray-300">WhatsApp</Label>
+                <Input
+                  id="signup-whatsapp"
+                  type="text"
+                  placeholder="+56 9 1234 5678"
+                  value={whatsapp}
+                  onChange={(e) => setWhatsapp(e.target.value)}
+                  required
+                  minLength={8}
+                  className="bg-gray-800 border-gray-700 text-white"
+                />
+                <p className="text-xs text-gray-500">Incluye código de país (ej. +56 para Chile)</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="signup-password" className="text-gray-300">Contraseña</Label>
