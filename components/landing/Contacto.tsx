@@ -181,7 +181,7 @@ export function Contacto() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-white mb-1">Teléfono</h3>
-                    <p className="text-gray-400">+56 9 4867 5503</p>
+                    <p className="text-gray-400">+56 9 8221 8271</p>
                   </div>
                 </div>
 

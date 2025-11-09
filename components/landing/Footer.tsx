@@ -64,7 +64,7 @@ export function Footer() {
             <div className="mt-6">
               <h4 className="text-sm font-semibold mb-2">Contacto</h4>
               <p className="text-gray-400 text-sm">
-                WhatsApp: +56 9 4867 5503
+                WhatsApp: +56 9 8221 8271
               </p>
             </div>
           </div>
