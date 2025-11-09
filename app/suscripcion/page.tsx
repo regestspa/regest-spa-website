@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Check, Sparkles, ArrowLeft, AlertCircle, Edit2, Copy, RefreshCw, Clock } from "lucide-react";
+import { Check, Sparkles, ArrowLeft, AlertCircle, Edit2, Copy, RefreshCw, Clock, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -181,6 +181,62 @@ export default function SubscriptionPage() {
     }
   };
 
+  const handleRequestCodeWhatsApp = async () => {
+    try {
+      if (!profile?.whatsapp) {
+        toast({
+          title: "WhatsApp requerido",
+          description: "Por favor agrega tu número de WhatsApp primero.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setRegeneratingCode(true);
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("No session");
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-access-code`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${session.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ action: "send_whatsapp" }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to send code");
+
+      const result = await response.json();
+
+      const whatsappNumber = profile.whatsapp.replace(/\D/g, '');
+      const message = `Hola, soy ${user?.email}. Mi código de acceso REGEST es: ${result.code}`;
+      const whatsappUrl = `https://wa.me/56${whatsappNumber}?text=${encodeURIComponent(message)}`;
+
+      window.open(whatsappUrl, '_blank');
+
+      toast({
+        title: "Código enviado",
+        description: "Se abrirá WhatsApp con tu código de acceso.",
+      });
+
+      refetchCode();
+    } catch (error) {
+      console.error("Error sending code:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo enviar el código.",
+        variant: "destructive",
+      });
+    } finally {
+      setRegeneratingCode(false);
+    }
+  };
+
   if (!user || loading || subLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
@@ -236,13 +292,14 @@ export default function SubscriptionPage() {
                   {accessCode && (
                     <div className="mt-3 p-3 bg-black/30 rounded-lg">
                       <p className="text-sm text-gray-400 mb-2">Tu código de acceso:</p>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 mb-3">
                         <code className="text-xl font-bold text-orange-400 tracking-wider">{accessCode.code}</code>
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={copyCodeToClipboard}
                           className="text-orange-500 hover:text-orange-400"
+                          title="Copiar código"
                         >
                           <Copy className="h-4 w-4" />
                         </Button>
@@ -252,11 +309,21 @@ export default function SubscriptionPage() {
                           onClick={handleRegenerateCode}
                           disabled={regeneratingCode}
                           className="text-orange-500 hover:text-orange-400"
+                          title="Regenerar código"
                         >
                           <RefreshCw className={`h-4 w-4 ${regeneratingCode ? 'animate-spin' : ''}`} />
                         </Button>
                       </div>
-                      <p className="text-xs text-gray-500 mt-2">
+                      <Button
+                        onClick={handleRequestCodeWhatsApp}
+                        disabled={regeneratingCode || !profile?.whatsapp}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white"
+                        size="sm"
+                      >
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        Solicitar código por WhatsApp
+                      </Button>
+                      <p className="text-xs text-gray-500 mt-3">
                         Expira el: {new Date(accessCode.expires_at).toLocaleDateString('es-ES', {
                           year: 'numeric',
                           month: 'long',

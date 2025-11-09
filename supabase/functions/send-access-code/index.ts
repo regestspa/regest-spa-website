@@ -84,6 +84,41 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    if (action === 'send_whatsapp') {
+      const { data: codeData, error: codeError } = await supabase
+        .from('access_codes')
+        .select('code, expires_at')
+        .eq('user_id', user.id)
+        .single();
+
+      if (codeError) throw codeError;
+
+      const { data: profileData, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('whatsapp')
+        .eq('user_id', user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: 'Código obtenido para WhatsApp.',
+          code: codeData.code,
+          expires_at: codeData.expires_at,
+          whatsapp: profileData.whatsapp,
+          email: user.email,
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    }
+
     const { data: codeData, error: codeError } = await supabase
       .from('access_codes')
       .select('code, expires_at')

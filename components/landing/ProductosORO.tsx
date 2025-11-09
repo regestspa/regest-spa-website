@@ -2,58 +2,125 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Bot, Calculator, Sparkles, ArrowRight, Lock } from "lucide-react";
+import { Bot, Calculator, Sparkles, ArrowRight, Lock, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/use-subscription";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 export function ProductosORO() {
   const { user } = useAuth();
-  const { hasRegestbotAccess, hasCalculatorAccess, loading, isTrialActive, getDaysRemaining } = useSubscription();
+  const { hasRegestbotAccess, hasCalculatorAccess, loading, isTrialActive, getDaysRemaining, accessCode } = useSubscription();
   const { toast } = useToast();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authPurpose, setAuthPurpose] = useState<"calculator" | "regestbot">("calculator");
+  const [showCodeModal, setShowCodeModal] = useState(false);
+  const [codeInput, setCodeInput] = useState("");
+  const [validatingCode, setValidatingCode] = useState(false);
+  const [pendingUrl, setPendingUrl] = useState<string>("");
 
-  const handleRegestbotAccess = () => {
+  const validateAndAccess = async (url: string) => {
     if (!user) {
-      setAuthPurpose("regestbot");
+      setAuthPurpose(url.includes("regestbot") ? "regestbot" : "calculator");
       setShowAuthModal(true);
       return;
     }
 
-    if (!hasRegestbotAccess()) {
-      toast({
-        title: "Acceso Premium requerido",
-        description: "Tu período de prueba ha finalizado. Actualiza a Premium para continuar accediendo a REGESTBOT.",
-        variant: "destructive",
-      });
+    const hasAccess = url.includes("regestbot") ? hasRegestbotAccess() : hasCalculatorAccess();
+
+    if (!hasAccess) {
+      setPendingUrl(url);
+      setShowCodeModal(true);
       return;
     }
 
-    window.open("https://chatgpt.com/g/g-688940f19af881919fe3a753eecf77ed-regestbot", "_blank", "noopener,noreferrer");
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const handleRegestbotAccess = () => {
+    validateAndAccess("https://chatgpt.com/g/g-688940f19af881919fe3a753eecf77ed-regestbot");
   };
 
   const handleCalculatorAccess = () => {
-    if (!user) {
-      setAuthPurpose("calculator");
-      setShowAuthModal(true);
-      return;
-    }
+    validateAndAccess("https://statuesque-scone-fcdb4f.netlify.app/");
+  };
 
-    if (!hasCalculatorAccess()) {
+  const handleValidateCode = async () => {
+    if (!codeInput || codeInput.length !== 6) {
       toast({
-        title: "Acceso denegado",
-        description: "No tienes acceso a la calculadora tributaria.",
+        title: "Código inválido",
+        description: "Por favor ingresa un código de 6 dígitos.",
         variant: "destructive",
       });
       return;
     }
 
-    window.open("https://statuesque-scone-fcdb4f.netlify.app/", "_blank", "noopener,noreferrer");
+    try {
+      setValidatingCode(true);
+
+      const { data: codeData, error } = await supabase
+        .from("access_codes")
+        .select("code, expires_at")
+        .eq("user_id", user?.id)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (!codeData) {
+        toast({
+          title: "Sin código",
+          description: "No tienes un código de acceso. Ve a 'Mi Plan' para obtener uno.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (codeData.code !== codeInput) {
+        toast({
+          title: "Código incorrecto",
+          description: "El código ingresado no es válido.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const now = new Date();
+      const expiresAt = new Date(codeData.expires_at);
+
+      if (now > expiresAt) {
+        toast({
+          title: "Código expirado",
+          description: "Tu código de acceso ha expirado. Actualiza a Premium para continuar.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Código válido",
+        description: "Abriendo el producto...",
+      });
+
+      setShowCodeModal(false);
+      setCodeInput("");
+      window.open(pendingUrl, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      console.error("Error validating code:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo validar el código.",
+        variant: "destructive",
+      });
+    } finally {
+      setValidatingCode(false);
+    }
   };
 
   return (
@@ -217,6 +284,73 @@ export function ProductosORO() {
           }
         }}
       />
+
+      <Dialog open={showCodeModal} onOpenChange={setShowCodeModal}>
+        <DialogContent className="bg-gray-900 border-orange-500/30 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+              <KeyRound className="h-6 w-6 text-orange-500" />
+              Ingresa tu Código de Acceso
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Ingresa el código de 6 dígitos que recibiste en tu WhatsApp o correo electrónico.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="code" className="text-gray-300">
+                Código de Acceso
+              </Label>
+              <Input
+                id="code"
+                type="text"
+                maxLength={6}
+                placeholder="000000"
+                value={codeInput}
+                onChange={(e) => setCodeInput(e.target.value.replace(/\D/g, ''))}
+                className="bg-gray-800 border-gray-700 text-white text-center text-2xl tracking-widest font-bold"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleValidateCode();
+                  }
+                }}
+              />
+            </div>
+
+            <div className="bg-orange-950/30 border border-orange-500/30 rounded-lg p-4">
+              <p className="text-sm text-gray-300 mb-2">
+                ¿No tienes tu código?
+              </p>
+              <ul className="text-xs text-gray-400 space-y-1">
+                <li>• Ve a la sección "Mi Plan" para ver o solicitar tu código</li>
+                <li>• Usa el botón de WhatsApp para recibirlo nuevamente</li>
+                <li>• También puedes regenerar tu código si lo perdiste</li>
+              </ul>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowCodeModal(false);
+                  setCodeInput("");
+                }}
+                className="flex-1 border-gray-700 text-gray-300 hover:bg-gray-800"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleValidateCode}
+                disabled={validatingCode || codeInput.length !== 6}
+                className="flex-1 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600"
+              >
+                {validatingCode ? "Validando..." : "Validar Código"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
