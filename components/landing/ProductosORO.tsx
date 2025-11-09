@@ -2,23 +2,58 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Bot, Calculator, Sparkles, ArrowRight } from "lucide-react";
+import { Bot, Calculator, Sparkles, ArrowRight, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/use-subscription";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { useToast } from "@/hooks/use-toast";
 
 export function ProductosORO() {
   const { user } = useAuth();
+  const { hasRegestbotAccess, hasCalculatorAccess, loading } = useSubscription();
+  const { toast } = useToast();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authPurpose, setAuthPurpose] = useState<"calculator" | "regestbot">("calculator");
+
+  const handleRegestbotAccess = () => {
+    if (!user) {
+      setAuthPurpose("regestbot");
+      setShowAuthModal(true);
+      return;
+    }
+
+    if (!hasRegestbotAccess()) {
+      toast({
+        title: "Suscripción requerida",
+        description: "Necesitas una suscripción Premium para acceder a REGESTBOT.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    window.open("https://chatgpt.com/g/g-688940f19af881919fe3a753eecf77ed-regestbot", "_blank", "noopener,noreferrer");
+  };
 
   const handleCalculatorAccess = () => {
-    if (user) {
-      window.open("https://statuesque-scone-fcdb4f.netlify.app/", "_blank", "noopener,noreferrer");
-    } else {
+    if (!user) {
+      setAuthPurpose("calculator");
       setShowAuthModal(true);
+      return;
     }
+
+    if (!hasCalculatorAccess()) {
+      toast({
+        title: "Acceso denegado",
+        description: "No tienes acceso a la calculadora tributaria.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    window.open("https://statuesque-scone-fcdb4f.netlify.app/", "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -90,18 +125,18 @@ export function ProductosORO() {
 
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button
-                    className="flex-1 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white rounded-full shadow-lg shadow-orange-500/50 hover:shadow-xl hover:shadow-orange-600/50 transform hover:scale-105 transition-all"
+                    onClick={handleRegestbotAccess}
+                    disabled={loading}
+                    className="flex-1 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white rounded-full shadow-lg shadow-orange-500/50 hover:shadow-xl hover:shadow-orange-600/50 transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     size="lg"
                   >
-                    Probar demo
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="flex-1 border-2 border-orange-500 text-orange-400 hover:bg-orange-950/30 rounded-full hover:shadow-lg transition-all"
-                    size="lg"
-                  >
-                    Ver planes
+                    {!user ? (
+                      <>Iniciar sesión <ArrowRight className="ml-2 h-4 w-4" /></>
+                    ) : !hasRegestbotAccess() ? (
+                      <><Lock className="mr-2 h-4 w-4" /> Premium requerido</>
+                    ) : (
+                      <>Abrir REGESTBOT <ArrowRight className="ml-2 h-4 w-4" /></>
+                    )}
                   </Button>
                 </div>
               </CardContent>
@@ -169,7 +204,9 @@ export function ProductosORO() {
         onClose={() => setShowAuthModal(false)}
         onSuccess={() => {
           setShowAuthModal(false);
-          window.open("https://statuesque-scone-fcdb4f.netlify.app/", "_blank", "noopener,noreferrer");
+          if (authPurpose === "calculator") {
+            window.open("https://statuesque-scone-fcdb4f.netlify.app/", "_blank", "noopener,noreferrer");
+          }
         }}
       />
     </section>
