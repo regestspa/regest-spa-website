@@ -57,6 +57,14 @@ export function Navbar() {
               </a>
             ))}
             <Button
+              variant="default"
+              size="sm"
+              className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white"
+              onClick={() => window.location.href = '/acceso-demo-regest-nuevo'}
+            >
+              Demo
+            </Button>
+            <Button
               variant="outline"
               size="sm"
               className="border-orange-500 text-orange-400 cursor-default opacity-70"
@@ -95,6 +103,15 @@ export function Navbar() {
                 {item.label}
               </a>
             ))}
+            <button
+              className="block w-full text-left px-4 py-2 text-white bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 rounded-lg transition-colors font-medium"
+              onClick={() => {
+                window.location.href = '/acceso-demo-regest-nuevo';
+                setIsMobileMenuOpen(false);
+              }}
+            >
+              Demo
+            </button>
             <div className="block px-4 py-2 text-gray-300 opacity-70 cursor-default">
               Iniciar sesión
             </div>
