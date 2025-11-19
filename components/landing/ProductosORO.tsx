@@ -1,36 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { Bot, Calculator, Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/contexts/AuthContext";
-import { AuthModal } from "@/components/auth/AuthModal";
 
 export function ProductosORO() {
-  const { user } = useAuth();
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authPurpose, setAuthPurpose] = useState<"calculator" | "regestbot">("calculator");
-
   const handleRegestbotAccess = () => {
-    if (!user) {
-      setAuthPurpose("regestbot");
-      setShowAuthModal(true);
-      return;
-    }
-
     window.open("https://chatgpt.com/g/g-688940f19af881919fe3a753eecf77ed-regestbot", "_blank", "noopener,noreferrer");
   };
 
   const handleCalculatorAccess = () => {
-    if (!user) {
-      setAuthPurpose("calculator");
-      setShowAuthModal(true);
-      return;
-    }
-
     window.open("https://statuesque-scone-fcdb4f.netlify.app/", "_blank", "noopener,noreferrer");
   };
 
@@ -104,11 +85,7 @@ export function ProductosORO() {
                     className="flex-1 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white rounded-full shadow-lg shadow-orange-500/50 hover:shadow-xl hover:shadow-orange-600/50 transform hover:scale-105 transition-all"
                     size="lg"
                   >
-                    {!user ? (
-                      <>Iniciar sesión para acceder <ArrowRight className="ml-2 h-4 w-4" /></>
-                    ) : (
-                      <>Abrir REGESTBOT <ArrowRight className="ml-2 h-4 w-4" /></>
-                    )}
+                    Abrir REGESTBOT <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
               </CardContent>
@@ -158,11 +135,7 @@ export function ProductosORO() {
                     className="flex-1 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white rounded-full shadow-lg shadow-orange-500/50 hover:shadow-xl hover:shadow-orange-600/50 transform hover:scale-105 transition-all"
                     size="lg"
                   >
-                    {!user ? (
-                      <>Iniciar sesión para acceder <ArrowRight className="ml-2 h-4 w-4" /></>
-                    ) : (
-                      <>Abrir Calculadora <ArrowRight className="ml-2 h-4 w-4" /></>
-                    )}
+                    Abrir Calculadora <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
               </CardContent>
@@ -170,19 +143,6 @@ export function ProductosORO() {
           </motion.div>
         </div>
       </div>
-
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onSuccess={() => {
-          setShowAuthModal(false);
-          if (authPurpose === "calculator") {
-            window.open("https://statuesque-scone-fcdb4f.netlify.app/", "_blank", "noopener,noreferrer");
-          } else {
-            window.open("https://chatgpt.com/g/g-688940f19af881919fe3a753eecf77ed-regestbot", "_blank", "noopener,noreferrer");
-          }
-        }}
-      />
     </section>
   );
 }

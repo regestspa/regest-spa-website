@@ -1,15 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Menu, X, User, Crown } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
-import { useSubscription } from "@/hooks/use-subscription";
-import Link from "next/link";
 
 export function Navbar() {
-  const { user, logout } = useAuth();
-  const { subscription } = useSubscription();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -61,32 +56,14 @@ export function Navbar() {
                 {item.label}
               </a>
             ))}
-            {user && (
-              <div className="flex items-center space-x-4 border-l border-gray-700 pl-6">
-                <Link href="/suscripcion">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-orange-500 text-orange-400 hover:bg-orange-950/30"
-                  >
-                    {subscription?.plan.name === "Premium" ? (
-                      <><Crown className="h-4 w-4 mr-2" /> Premium</>
-                    ) : (
-                      <>Mi Plan</>
-                    )}
-                  </Button>
-                </Link>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={logout}
-                  className="text-gray-400 hover:text-white"
-                >
-                  <User className="h-4 w-4 mr-2" />
-                  Cerrar sesión
-                </Button>
-              </div>
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-orange-500 text-orange-400 cursor-default opacity-70"
+              disabled
+            >
+              Iniciar sesión
+            </Button>
           </div>
 
           <div className="md:hidden">
@@ -118,30 +95,9 @@ export function Navbar() {
                 {item.label}
               </a>
             ))}
-            {user && (
-              <>
-                <div className="border-t border-gray-700 my-2" />
-                <Link href="/suscripcion" onClick={() => setIsMobileMenuOpen(false)}>
-                  <div className="block px-4 py-2 text-gray-300 hover:bg-orange-950/50 hover:text-orange-500 rounded-lg transition-colors">
-                    {subscription?.plan.name === "Premium" ? (
-                      <><Crown className="h-4 w-4 mr-2 inline" /> Mi Plan Premium</>
-                    ) : (
-                      <>Mi Plan</>
-                    )}
-                  </div>
-                </Link>
-                <button
-                  onClick={() => {
-                    logout();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left block px-4 py-2 text-gray-300 hover:bg-orange-950/50 hover:text-orange-500 rounded-lg transition-colors"
-                >
-                  <User className="h-4 w-4 mr-2 inline" />
-                  Cerrar sesión
-                </button>
-              </>
-            )}
+            <div className="block px-4 py-2 text-gray-300 opacity-70 cursor-default">
+              Iniciar sesión
+            </div>
           </div>
         </div>
       )}
