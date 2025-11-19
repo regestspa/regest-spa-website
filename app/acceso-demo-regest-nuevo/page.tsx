@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function AccesoDemoRegestNuevoPage() {
+export default function AccesoDemoRegestNuevo() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     nombre: "",
@@ -29,72 +29,71 @@ export default function AccesoDemoRegestNuevoPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-orange-950 to-black flex items-center justify-center p-6">
-      <div className="w-full max-w-xl">
-        <div className="text-center mb-10">
-          <h1 className="text-5xl font-bold text-white mb-3">
-            Accede a la Demo de REGEST
-          </h1>
-          <p className="text-lg text-orange-200">
-            Completa tus datos para continuar
-          </p>
-        </div>
-
-        <Card className="shadow-2xl border-2 border-orange-500/30 bg-black/40 backdrop-blur-md">
-          <CardContent className="pt-8 pb-8">
+      <div className="w-full max-w-2xl">
+        <Card className="shadow-2xl border-2 border-orange-500/50 bg-slate-900/80 backdrop-blur-md">
+          <CardHeader className="text-center space-y-4 pb-6">
+            <CardTitle className="text-5xl font-bold text-white">
+              Acceso a Demo REGEST
+            </CardTitle>
+            <p className="text-xl text-orange-200">
+              Completa tus datos para acceder a la demostración
+            </p>
+          </CardHeader>
+          <CardContent className="pb-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="nombre" className="text-sm font-medium text-orange-100">
-                  Nombre completo
+                <Label htmlFor="nombre" className="text-base font-medium text-orange-100">
+                  Nombre Completo
                 </Label>
                 <Input
                   id="nombre"
                   name="nombre"
                   type="text"
-                  placeholder="Escribe tu nombre completo"
+                  placeholder="Ingresa tu nombre completo"
                   value={formData.nombre}
                   onChange={handleChange}
                   required
-                  className="h-12 bg-gray-900/50 border-orange-500/30 text-white placeholder:text-gray-500"
+                  className="h-14 text-lg bg-slate-800/50 border-orange-500/30 text-white placeholder:text-gray-400 focus:border-orange-500"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="correo" className="text-sm font-medium text-orange-100">
-                  Correo electrónico
+                <Label htmlFor="correo" className="text-base font-medium text-orange-100">
+                  Correo Electrónico
                 </Label>
                 <Input
                   id="correo"
                   name="correo"
                   type="email"
-                  placeholder="tu@correo.com"
+                  placeholder="ejemplo@correo.com"
                   value={formData.correo}
                   onChange={handleChange}
                   required
-                  className="h-12 bg-gray-900/50 border-orange-500/30 text-white placeholder:text-gray-500"
+                  className="h-14 text-lg bg-slate-800/50 border-orange-500/30 text-white placeholder:text-gray-400 focus:border-orange-500"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="whatsapp" className="text-sm font-medium text-orange-100">
-                  WhatsApp con código del país
+                <Label htmlFor="whatsapp" className="text-base font-medium text-orange-100">
+                  WhatsApp (con código de país)
                 </Label>
                 <Input
                   id="whatsapp"
                   name="whatsapp"
                   type="tel"
-                  placeholder="+56912345678"
+                  placeholder="+56 9 1234 5678"
                   value={formData.whatsapp}
                   onChange={handleChange}
                   required
-                  className="h-12 bg-gray-900/50 border-orange-500/30 text-white placeholder:text-gray-500"
+                  className="h-14 text-lg bg-slate-800/50 border-orange-500/30 text-white placeholder:text-gray-400 focus:border-orange-500"
                 />
               </div>
 
               <Button
                 type="submit"
-                className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white mt-8 shadow-lg shadow-orange-500/50"
+                className="w-full h-16 text-xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white shadow-xl shadow-orange-500/30 transition-all duration-300"
               >
-                Ingresar a la Demo
+                Acceder a la Demo
               </Button>
             </form>
           </CardContent>
