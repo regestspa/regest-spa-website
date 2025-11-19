@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function AccesoDemoRegestPage() {
   const router = useRouter();
@@ -40,8 +40,7 @@ export default function AccesoDemoRegestPage() {
         </div>
 
         <Card className="shadow-2xl border border-gray-200">
-          <CardHeader className="pb-4"></CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="nombre" className="text-sm font-medium text-gray-700">
