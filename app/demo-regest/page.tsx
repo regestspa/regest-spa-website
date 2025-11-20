@@ -7,128 +7,74 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calculator, Bot, Home, ExternalLink } from "lucide-react";
 
-interface CalculoResultadoMensual {
+interface CalculoResultadoAnual {
   impuesto: number;
   factor: number;
   rebaja: number;
   tramo: string;
-}
-
-interface CalculoResultadoAnual {
-  impuesto: number;
-  factor: number;
-  tramo: string;
+  uta: number;
 }
 
 export default function DemoRegest() {
-  const [modoCalculo, setModoCalculo] = useState<"mensual" | "anual">("mensual");
-  const [rentaMensual, setRentaMensual] = useState("");
   const [rentaAnual, setRentaAnual] = useState("");
-  const [resultadoMensual, setResultadoMensual] = useState<CalculoResultadoMensual | null>(null);
   const [resultadoAnual, setResultadoAnual] = useState<CalculoResultadoAnual | null>(null);
   const [chatResponse, setChatResponse] = useState("");
 
-  const handleCalcularMensual = () => {
-    const renta = parseFloat(rentaMensual);
+  const handleCalcularAnual = () => {
+    const renta = parseFloat(rentaAnual);
     if (isNaN(renta) || renta < 0) return;
+
+    const UTA = 617180;
+    const uta = renta / UTA;
 
     let impuesto = 0;
     let factor = 0;
     let rebaja = 0;
     let tramo = "";
 
-    if (renta <= 938817) {
-      impuesto = 0;
+    if (uta <= 13.5) {
       factor = 0;
       rebaja = 0;
-      tramo = "Exento";
-    } else if (renta <= 2086260) {
-      factor = 0.04;
-      rebaja = 37552.68;
-      impuesto = (renta * factor) - rebaja;
-      tramo = "$938.817,01 - $2.086.260";
-    } else if (renta <= 3477100) {
-      factor = 0.08;
-      rebaja = 121003.08;
-      impuesto = (renta * factor) - rebaja;
-      tramo = "$2.086.260,01 - $3.477.100";
-    } else if (renta <= 4867940) {
-      factor = 0.135;
-      rebaja = 312243.58;
-      impuesto = (renta * factor) - rebaja;
-      tramo = "$3.477.100,01 - $4.867.940";
-    } else if (renta <= 6258780) {
-      factor = 0.23;
-      rebaja = 774697.88;
-      impuesto = (renta * factor) - rebaja;
-      tramo = "$4.867.940,01 - $6.258.780";
-    } else if (renta <= 8345040) {
-      factor = 0.304;
-      rebaja = 1237847.60;
-      impuesto = (renta * factor) - rebaja;
-      tramo = "$6.258.780,01 - $8.345.040";
-    } else if (renta <= 21558020) {
-      factor = 0.35;
-      rebaja = 1621719.44;
-      impuesto = (renta * factor) - rebaja;
-      tramo = "$8.345.040,01 - $21.558.020";
-    } else {
-      factor = 0.40;
-      rebaja = 2699620.44;
-      impuesto = (renta * factor) - rebaja;
-      tramo = "Más de $21.558.020";
-    }
-
-    setResultadoMensual({
-      impuesto: Math.max(0, impuesto),
-      factor: factor * 100,
-      rebaja,
-      tramo
-    });
-  };
-
-  const handleCalcularAnual = () => {
-    const renta = parseFloat(rentaAnual);
-    if (isNaN(renta) || renta < 0) return;
-
-    let impuesto = 0;
-    let factor = 0;
-    let tramo = "";
-
-    if (renta <= 8000000) {
       impuesto = 0;
-      factor = 0;
-      tramo = "Exento (hasta $8.000.000)";
-    } else if (renta <= 15000000) {
+      tramo = "0 a 13,5 UTA (Exento)";
+    } else if (uta <= 30) {
       factor = 0.04;
-      impuesto = renta * factor;
-      tramo = "$8.000.001 - $15.000.000";
-    } else if (renta <= 27000000) {
+      rebaja = 540756;
+      impuesto = (renta * factor) - rebaja;
+      tramo = "13,5 a 30 UTA";
+    } else if (uta <= 50) {
       factor = 0.08;
-      impuesto = renta * factor;
-      tramo = "$15.000.001 - $27.000.000";
-    } else if (renta <= 40000000) {
+      rebaja = 1081511;
+      impuesto = (renta * factor) - rebaja;
+      tramo = "30 a 50 UTA";
+    } else if (uta <= 70) {
       factor = 0.135;
-      impuesto = renta * factor;
-      tramo = "$27.000.001 - $40.000.000";
-    } else if (renta <= 60000000) {
+      rebaja = 2491370;
+      impuesto = (renta * factor) - rebaja;
+      tramo = "50 a 70 UTA";
+    } else if (uta <= 90) {
       factor = 0.23;
-      impuesto = renta * factor;
-      tramo = "$40.000.001 - $60.000.000";
-    } else if (renta <= 90000000) {
+      rebaja = 7340222;
+      impuesto = (renta * factor) - rebaja;
+      tramo = "70 a 90 UTA";
+    } else if (uta <= 120) {
       factor = 0.304;
-      impuesto = renta * factor;
-      tramo = "$60.000.001 - $90.000.000";
+      rebaja = 13296451;
+      impuesto = (renta * factor) - rebaja;
+      tramo = "90 a 120 UTA";
     } else {
       factor = 0.35;
-      impuesto = renta * factor;
-      tramo = "Más de $90.000.000";
+      rebaja = 17522651;
+      impuesto = (renta * factor) - rebaja;
+      tramo = "Más de 120 UTA";
     }
 
     setResultadoAnual({
-      impuesto,
+      impuesto: Math.max(0, impuesto),
       factor: factor * 100,
-      tramo
+      rebaja,
+      tramo,
+      uta
     });
   };
 
@@ -179,129 +125,60 @@ export default function DemoRegest() {
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex gap-2 p-1 bg-slate-800 rounded-lg">
-                <Button
-                  onClick={() => {
-                    setModoCalculo("mensual");
-                    setResultadoMensual(null);
-                    setResultadoAnual(null);
-                  }}
-                  className={`flex-1 ${
-                    modoCalculo === "mensual"
-                      ? "bg-gradient-to-r from-orange-600 to-orange-500 text-white"
-                      : "bg-transparent text-gray-400 hover:text-white"
-                  }`}
-                  variant={modoCalculo === "mensual" ? "default" : "ghost"}
-                >
-                  Mensual
-                </Button>
-                <Button
-                  onClick={() => {
-                    setModoCalculo("anual");
-                    setResultadoMensual(null);
-                    setResultadoAnual(null);
-                  }}
-                  className={`flex-1 ${
-                    modoCalculo === "anual"
-                      ? "bg-gradient-to-r from-orange-600 to-orange-500 text-white"
-                      : "bg-transparent text-gray-400 hover:text-white"
-                  }`}
-                  variant={modoCalculo === "anual" ? "default" : "ghost"}
-                >
-                  Anual
-                </Button>
-              </div>
-
-              {modoCalculo === "mensual" ? (
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-1">
-                      Calculadora Mensual (IUSC – Impuesto Único)
-                    </h3>
-                    <p className="text-sm text-gray-400">
-                      Ingresa tu renta mensual sin descuentos.
-                    </p>
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label htmlFor="renta-mensual" className="text-gray-300">
-                      Renta mensual
-                    </Label>
-                    <Input
-                      id="renta-mensual"
-                      type="number"
-                      placeholder="Ingresa tu renta mensual"
-                      value={rentaMensual}
-                      onChange={(e) => setRentaMensual(e.target.value)}
-                      className="bg-slate-800 border-slate-700 text-white placeholder:text-gray-500"
-                    />
-                    <Button
-                      onClick={handleCalcularMensual}
-                      className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white"
-                    >
-                      Calcular impuesto mensual
-                    </Button>
-                  </div>
-
-                  {resultadoMensual !== null && (
-                    <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg space-y-2">
-                      <p className="text-orange-400 font-bold text-lg">
-                        Impuesto mensual estimado: ${resultadoMensual.impuesto.toLocaleString('es-CL', { maximumFractionDigits: 0 })}
-                      </p>
-                      <div className="text-sm text-gray-300 space-y-1">
-                        <p>Factor aplicado: {resultadoMensual.factor}%</p>
-                        <p>Cantidad rebajada del tramo: ${resultadoMensual.rebaja.toLocaleString('es-CL', { maximumFractionDigits: 2 })}</p>
-                        <p>Tramo aplicado según SII: {resultadoMensual.tramo}</p>
-                      </div>
-                    </div>
-                  )}
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-1">
+                    Calculadora Anual (IGC Real)
+                  </h3>
+                  <p className="text-sm text-gray-400">
+                    Ingresa tu renta anual sin deducciones.
+                  </p>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-1">
-                      Calculadora Anual (IGC – Impuesto Global Complementario)
-                    </h3>
-                    <p className="text-sm text-gray-400">
-                      Ingresa tu renta anual sin deducciones.
-                    </p>
-                  </div>
 
-                  <div className="space-y-3">
-                    <Label htmlFor="renta-anual" className="text-gray-300">
-                      Renta anual
-                    </Label>
-                    <Input
-                      id="renta-anual"
-                      type="number"
-                      placeholder="Ingresa tu renta anual"
-                      value={rentaAnual}
-                      onChange={(e) => setRentaAnual(e.target.value)}
-                      className="bg-slate-800 border-slate-700 text-white placeholder:text-gray-500"
-                    />
-                    <Button
-                      onClick={handleCalcularAnual}
-                      className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white"
-                    >
-                      Calcular impuesto anual
-                    </Button>
-                  </div>
+                <div className="space-y-3">
+                  <Label htmlFor="renta-anual" className="text-gray-300">
+                    Renta anual
+                  </Label>
+                  <Input
+                    id="renta-anual"
+                    type="number"
+                    placeholder="Ingresa tu renta anual"
+                    value={rentaAnual}
+                    onChange={(e) => setRentaAnual(e.target.value)}
+                    className="bg-slate-800 border-slate-700 text-white placeholder:text-gray-500"
+                  />
+                  <Button
+                    onClick={handleCalcularAnual}
+                    className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white"
+                  >
+                    Calcular Impuesto Anual
+                  </Button>
+                </div>
 
-                  {resultadoAnual !== null && (
+                {resultadoAnual !== null && (
+                  <div className="space-y-4">
                     <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg space-y-2">
                       <p className="text-orange-400 font-bold text-lg">
                         Impuesto anual estimado: ${resultadoAnual.impuesto.toLocaleString('es-CL', { maximumFractionDigits: 0 })}
                       </p>
                       <div className="text-sm text-gray-300 space-y-1">
-                        <p>Tramo aplicado: {resultadoAnual.factor}%</p>
-                        <p>Rango: {resultadoAnual.tramo}</p>
+                        <p>Tu renta: {resultadoAnual.uta.toFixed(2)} UTA</p>
+                        <p>Tasa aplicada: {resultadoAnual.factor}%</p>
+                        <p>Rebaja del tramo: ${resultadoAnual.rebaja.toLocaleString('es-CL')}</p>
+                        <p>Tramo: {resultadoAnual.tramo}</p>
                       </div>
                     </div>
-                  )}
-                </div>
-              )}
 
-              {(resultadoMensual !== null || resultadoAnual !== null) && (
+                    <div className="p-3 bg-slate-800 border border-slate-700 rounded-lg">
+                      <p className="text-xs text-gray-400">
+                        <span className="font-semibold text-gray-300">Referencia:</span> 1 UTA = $617.180 (valor fijo para esta simulación según DL 824, art. 52)
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {resultadoAnual !== null && (
                 <div className="space-y-3 pt-4 border-t border-slate-700">
                   <p className="text-sm text-gray-300 text-center leading-relaxed">
                     ¿Quieres optimizar tu impuesto y pagar solo lo justo?<br />
