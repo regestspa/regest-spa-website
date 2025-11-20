@@ -7,19 +7,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calculator, Bot, Home, ExternalLink } from "lucide-react";
 
-interface CalculoResultado {
+interface CalculoResultadoMensual {
   impuesto: number;
   factor: number;
   rebaja: number;
   tramo: string;
 }
 
+interface CalculoResultadoAnual {
+  impuesto: number;
+  factor: number;
+  tramo: string;
+}
+
 export default function DemoRegest() {
+  const [modoCalculo, setModoCalculo] = useState<"mensual" | "anual">("mensual");
   const [rentaMensual, setRentaMensual] = useState("");
-  const [resultado, setResultado] = useState<CalculoResultado | null>(null);
+  const [rentaAnual, setRentaAnual] = useState("");
+  const [resultadoMensual, setResultadoMensual] = useState<CalculoResultadoMensual | null>(null);
+  const [resultadoAnual, setResultadoAnual] = useState<CalculoResultadoAnual | null>(null);
   const [chatResponse, setChatResponse] = useState("");
 
-  const handleCalcular = () => {
+  const handleCalcularMensual = () => {
     const renta = parseFloat(rentaMensual);
     if (isNaN(renta) || renta < 0) return;
 
@@ -70,10 +79,55 @@ export default function DemoRegest() {
       tramo = "Más de $21.558.020";
     }
 
-    setResultado({
+    setResultadoMensual({
       impuesto: Math.max(0, impuesto),
       factor: factor * 100,
       rebaja,
+      tramo
+    });
+  };
+
+  const handleCalcularAnual = () => {
+    const renta = parseFloat(rentaAnual);
+    if (isNaN(renta) || renta < 0) return;
+
+    let impuesto = 0;
+    let factor = 0;
+    let tramo = "";
+
+    if (renta <= 8000000) {
+      impuesto = 0;
+      factor = 0;
+      tramo = "Exento (hasta $8.000.000)";
+    } else if (renta <= 15000000) {
+      factor = 0.04;
+      impuesto = renta * factor;
+      tramo = "$8.000.001 - $15.000.000";
+    } else if (renta <= 27000000) {
+      factor = 0.08;
+      impuesto = renta * factor;
+      tramo = "$15.000.001 - $27.000.000";
+    } else if (renta <= 40000000) {
+      factor = 0.135;
+      impuesto = renta * factor;
+      tramo = "$27.000.001 - $40.000.000";
+    } else if (renta <= 60000000) {
+      factor = 0.23;
+      impuesto = renta * factor;
+      tramo = "$40.000.001 - $60.000.000";
+    } else if (renta <= 90000000) {
+      factor = 0.304;
+      impuesto = renta * factor;
+      tramo = "$60.000.001 - $90.000.000";
+    } else {
+      factor = 0.35;
+      impuesto = renta * factor;
+      tramo = "Más de $90.000.000";
+    }
+
+    setResultadoAnual({
+      impuesto,
+      factor: factor * 100,
       tramo
     });
   };
@@ -117,63 +171,151 @@ export default function DemoRegest() {
                   <Calculator className="h-8 w-8 text-orange-500" />
                 </div>
                 <div className="flex-1">
-                  <CardTitle className="text-xl text-white">Calculadora de Impuesto Único (Demo IUSC)</CardTitle>
+                  <CardTitle className="text-xl text-white">Calculadora Tributaria</CardTitle>
                   <CardDescription className="text-gray-400 text-sm mt-1">
-                    Simula tu impuesto mensual según la tabla oficial del SII.
+                    Elige entre cálculo mensual o anual
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-3">
-                <Label htmlFor="renta" className="text-gray-300">
-                  Renta mensual
-                </Label>
-                <Input
-                  id="renta"
-                  type="number"
-                  placeholder="Ingresa tu renta líquida imponible mensual"
-                  value={rentaMensual}
-                  onChange={(e) => setRentaMensual(e.target.value)}
-                  className="bg-slate-800 border-slate-700 text-white placeholder:text-gray-500"
-                />
-                <p className="text-xs text-gray-500">
-                  *Simulación simplificada. Usa solo tu renta mensual sin deducciones.
-                </p>
+              <div className="flex gap-2 p-1 bg-slate-800 rounded-lg">
                 <Button
-                  onClick={handleCalcular}
-                  className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white"
+                  onClick={() => {
+                    setModoCalculo("mensual");
+                    setResultadoMensual(null);
+                    setResultadoAnual(null);
+                  }}
+                  className={`flex-1 ${
+                    modoCalculo === "mensual"
+                      ? "bg-gradient-to-r from-orange-600 to-orange-500 text-white"
+                      : "bg-transparent text-gray-400 hover:text-white"
+                  }`}
+                  variant={modoCalculo === "mensual" ? "default" : "ghost"}
                 >
-                  Calcular Impuesto
+                  Mensual
+                </Button>
+                <Button
+                  onClick={() => {
+                    setModoCalculo("anual");
+                    setResultadoMensual(null);
+                    setResultadoAnual(null);
+                  }}
+                  className={`flex-1 ${
+                    modoCalculo === "anual"
+                      ? "bg-gradient-to-r from-orange-600 to-orange-500 text-white"
+                      : "bg-transparent text-gray-400 hover:text-white"
+                  }`}
+                  variant={modoCalculo === "anual" ? "default" : "ghost"}
+                >
+                  Anual
                 </Button>
               </div>
 
-              {resultado !== null && (
-                <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg space-y-2">
-                  <p className="text-orange-400 font-bold text-lg">
-                    Impuesto mensual estimado: ${resultado.impuesto.toLocaleString('es-CL', { maximumFractionDigits: 0 })}
-                  </p>
-                  <div className="text-sm text-gray-300 space-y-1">
-                    <p>Factor aplicado: {resultado.factor}%</p>
-                    <p>Cantidad rebajada: ${resultado.rebaja.toLocaleString('es-CL', { maximumFractionDigits: 2 })}</p>
-                    <p>Tramo del SII aplicado: {resultado.tramo}</p>
+              {modoCalculo === "mensual" ? (
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-1">
+                      Calculadora Mensual (IUSC – Impuesto Único)
+                    </h3>
+                    <p className="text-sm text-gray-400">
+                      Ingresa tu renta mensual sin descuentos.
+                    </p>
                   </div>
+
+                  <div className="space-y-3">
+                    <Label htmlFor="renta-mensual" className="text-gray-300">
+                      Renta mensual
+                    </Label>
+                    <Input
+                      id="renta-mensual"
+                      type="number"
+                      placeholder="Ingresa tu renta mensual"
+                      value={rentaMensual}
+                      onChange={(e) => setRentaMensual(e.target.value)}
+                      className="bg-slate-800 border-slate-700 text-white placeholder:text-gray-500"
+                    />
+                    <Button
+                      onClick={handleCalcularMensual}
+                      className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white"
+                    >
+                      Calcular impuesto mensual
+                    </Button>
+                  </div>
+
+                  {resultadoMensual !== null && (
+                    <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg space-y-2">
+                      <p className="text-orange-400 font-bold text-lg">
+                        Impuesto mensual estimado: ${resultadoMensual.impuesto.toLocaleString('es-CL', { maximumFractionDigits: 0 })}
+                      </p>
+                      <div className="text-sm text-gray-300 space-y-1">
+                        <p>Factor aplicado: {resultadoMensual.factor}%</p>
+                        <p>Cantidad rebajada del tramo: ${resultadoMensual.rebaja.toLocaleString('es-CL', { maximumFractionDigits: 2 })}</p>
+                        <p>Tramo aplicado según SII: {resultadoMensual.tramo}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-1">
+                      Calculadora Anual (IGC – Impuesto Global Complementario)
+                    </h3>
+                    <p className="text-sm text-gray-400">
+                      Ingresa tu renta anual sin deducciones.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label htmlFor="renta-anual" className="text-gray-300">
+                      Renta anual
+                    </Label>
+                    <Input
+                      id="renta-anual"
+                      type="number"
+                      placeholder="Ingresa tu renta anual"
+                      value={rentaAnual}
+                      onChange={(e) => setRentaAnual(e.target.value)}
+                      className="bg-slate-800 border-slate-700 text-white placeholder:text-gray-500"
+                    />
+                    <Button
+                      onClick={handleCalcularAnual}
+                      className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white"
+                    >
+                      Calcular impuesto anual
+                    </Button>
+                  </div>
+
+                  {resultadoAnual !== null && (
+                    <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg space-y-2">
+                      <p className="text-orange-400 font-bold text-lg">
+                        Impuesto anual estimado: ${resultadoAnual.impuesto.toLocaleString('es-CL', { maximumFractionDigits: 0 })}
+                      </p>
+                      <div className="text-sm text-gray-300 space-y-1">
+                        <p>Tramo aplicado: {resultadoAnual.factor}%</p>
+                        <p>Rango: {resultadoAnual.tramo}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
-              <div className="space-y-2">
-                <Button
-                  variant="outline"
-                  className="w-full border-orange-500 text-orange-400 hover:bg-orange-500 hover:text-white"
-                  onClick={() => window.open('https://wa.me/56912345678', '_blank')}
-                >
-                  Quiero la versión completa
-                  <ExternalLink className="ml-2 h-4 w-4" />
-                </Button>
-                <p className="text-xs text-center text-gray-500">
-                  Incluye rebajas, créditos y retiros.
-                </p>
-              </div>
+              {(resultadoMensual !== null || resultadoAnual !== null) && (
+                <div className="space-y-3 pt-4 border-t border-slate-700">
+                  <p className="text-sm text-gray-300 text-center leading-relaxed">
+                    ¿Quieres optimizar tu impuesto y pagar solo lo justo?<br />
+                    Accede a la versión completa y descubre cuánto puedes ahorrar con REGEST.
+                  </p>
+                  <Button
+                    className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white py-6 text-base font-semibold"
+                    onClick={() => window.open('https://wa.me/56912345678', '_blank')}
+                  >
+                    Solicitar versión completa
+                    <ExternalLink className="ml-2 h-5 w-5" />
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 
