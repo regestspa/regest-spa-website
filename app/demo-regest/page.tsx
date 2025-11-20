@@ -7,17 +7,75 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calculator, Bot, Home, ExternalLink } from "lucide-react";
 
+interface CalculoResultado {
+  impuesto: number;
+  factor: number;
+  rebaja: number;
+  tramo: string;
+}
+
 export default function DemoRegest() {
-  const [rentaAnual, setRentaAnual] = useState("");
-  const [resultado, setResultado] = useState<number | null>(null);
+  const [rentaMensual, setRentaMensual] = useState("");
+  const [resultado, setResultado] = useState<CalculoResultado | null>(null);
   const [chatResponse, setChatResponse] = useState("");
 
   const handleCalcular = () => {
-    const renta = parseFloat(rentaAnual);
-    if (!isNaN(renta)) {
-      const impuesto = renta * 0.10;
-      setResultado(impuesto);
+    const renta = parseFloat(rentaMensual);
+    if (isNaN(renta) || renta < 0) return;
+
+    let impuesto = 0;
+    let factor = 0;
+    let rebaja = 0;
+    let tramo = "";
+
+    if (renta <= 938817) {
+      impuesto = 0;
+      factor = 0;
+      rebaja = 0;
+      tramo = "Exento";
+    } else if (renta <= 2086260) {
+      factor = 0.04;
+      rebaja = 37552.68;
+      impuesto = (renta * factor) - rebaja;
+      tramo = "$938.817,01 - $2.086.260";
+    } else if (renta <= 3477100) {
+      factor = 0.08;
+      rebaja = 121003.08;
+      impuesto = (renta * factor) - rebaja;
+      tramo = "$2.086.260,01 - $3.477.100";
+    } else if (renta <= 4867940) {
+      factor = 0.135;
+      rebaja = 312243.58;
+      impuesto = (renta * factor) - rebaja;
+      tramo = "$3.477.100,01 - $4.867.940";
+    } else if (renta <= 6258780) {
+      factor = 0.23;
+      rebaja = 774697.88;
+      impuesto = (renta * factor) - rebaja;
+      tramo = "$4.867.940,01 - $6.258.780";
+    } else if (renta <= 8345040) {
+      factor = 0.304;
+      rebaja = 1237847.60;
+      impuesto = (renta * factor) - rebaja;
+      tramo = "$6.258.780,01 - $8.345.040";
+    } else if (renta <= 21558020) {
+      factor = 0.35;
+      rebaja = 1621719.44;
+      impuesto = (renta * factor) - rebaja;
+      tramo = "$8.345.040,01 - $21.558.020";
+    } else {
+      factor = 0.40;
+      rebaja = 2699620.44;
+      impuesto = (renta * factor) - rebaja;
+      tramo = "Más de $21.558.020";
     }
+
+    setResultado({
+      impuesto: Math.max(0, impuesto),
+      factor: factor * 100,
+      rebaja,
+      tramo
+    });
   };
 
   const handleChatQuestion = (question: string) => {
@@ -58,10 +116,10 @@ export default function DemoRegest() {
                 <div className="p-3 bg-orange-500/20 rounded-lg">
                   <Calculator className="h-8 w-8 text-orange-500" />
                 </div>
-                <div>
-                  <CardTitle className="text-2xl text-white">Calculadora Tributaria</CardTitle>
-                  <CardDescription className="text-gray-400">
-                    Simula rápidamente tu impuesto estimado.
+                <div className="flex-1">
+                  <CardTitle className="text-xl text-white">Calculadora de Impuesto Único (Demo IUSC)</CardTitle>
+                  <CardDescription className="text-gray-400 text-sm mt-1">
+                    Simula tu impuesto mensual según la tabla oficial del SII.
                   </CardDescription>
                 </div>
               </div>
@@ -69,40 +127,53 @@ export default function DemoRegest() {
             <CardContent className="space-y-6">
               <div className="space-y-3">
                 <Label htmlFor="renta" className="text-gray-300">
-                  Renta anual
+                  Renta mensual
                 </Label>
                 <Input
                   id="renta"
                   type="number"
-                  placeholder="Ingresa tu renta anual"
-                  value={rentaAnual}
-                  onChange={(e) => setRentaAnual(e.target.value)}
+                  placeholder="Ingresa tu renta líquida imponible mensual"
+                  value={rentaMensual}
+                  onChange={(e) => setRentaMensual(e.target.value)}
                   className="bg-slate-800 border-slate-700 text-white placeholder:text-gray-500"
                 />
+                <p className="text-xs text-gray-500">
+                  *Simulación simplificada. Usa solo tu renta mensual sin deducciones.
+                </p>
                 <Button
                   onClick={handleCalcular}
                   className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white"
                 >
-                  Calcular
+                  Calcular Impuesto
                 </Button>
               </div>
 
               {resultado !== null && (
-                <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg">
-                  <p className="text-orange-400 font-semibold">
-                    Resultado estimado: ${resultado.toLocaleString('es-CL')}
+                <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg space-y-2">
+                  <p className="text-orange-400 font-bold text-lg">
+                    Impuesto mensual estimado: ${resultado.impuesto.toLocaleString('es-CL', { maximumFractionDigits: 0 })}
                   </p>
+                  <div className="text-sm text-gray-300 space-y-1">
+                    <p>Factor aplicado: {resultado.factor}%</p>
+                    <p>Cantidad rebajada: ${resultado.rebaja.toLocaleString('es-CL', { maximumFractionDigits: 2 })}</p>
+                    <p>Tramo del SII aplicado: {resultado.tramo}</p>
+                  </div>
                 </div>
               )}
 
-              <Button
-                variant="outline"
-                className="w-full border-orange-500 text-orange-400 hover:bg-orange-500 hover:text-white"
-                onClick={() => window.open('https://wa.me/56912345678', '_blank')}
-              >
-                Ver versión completa
-                <ExternalLink className="ml-2 h-4 w-4" />
-              </Button>
+              <div className="space-y-2">
+                <Button
+                  variant="outline"
+                  className="w-full border-orange-500 text-orange-400 hover:bg-orange-500 hover:text-white"
+                  onClick={() => window.open('https://wa.me/56912345678', '_blank')}
+                >
+                  Quiero la versión completa
+                  <ExternalLink className="ml-2 h-4 w-4" />
+                </Button>
+                <p className="text-xs text-center text-gray-500">
+                  Incluye rebajas, créditos y retiros.
+                </p>
+              </div>
             </CardContent>
           </Card>
 
