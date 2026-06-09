@@ -51,7 +51,7 @@ export function Hero() {
             asChild
           >
             <a
-              href="https://wa.me/56982218271"
+              href="https://wa.me/56982428895"
               target="_blank"
               rel="noopener noreferrer"
             >

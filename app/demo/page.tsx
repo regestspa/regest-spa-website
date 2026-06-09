@@ -1,11 +1,11 @@
 "use client";
 
-import { MessageCircle, Briefcase, Zap, FileBarChart } from "lucide-react";
+import { MessageCircle, Briefcase, Zap, ChartBar as FileBarChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function DemoPage() {
-  const whatsappUrl = "https://wa.me/56900000000";
+  const whatsappUrl = "https://wa.me/56982428895";
 
   const demoFeatures = [
     {

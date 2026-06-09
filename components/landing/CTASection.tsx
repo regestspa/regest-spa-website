@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MessageCircle, PlayCircle } from "lucide-react";
+import { MessageCircle, CirclePlay as PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function CTASection() {
@@ -29,7 +29,7 @@ export function CTASection() {
               asChild
             >
               <a
-                href="https://wa.me/56982218271"
+                href="https://wa.me/56982428895"
                 target="_blank"
                 rel="noopener noreferrer"
               >

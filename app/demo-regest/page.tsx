@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calculator, Bot, Home, ExternalLink } from "lucide-react";
+import { Calculator, Bot, Chrome as Home, ExternalLink } from "lucide-react";
 
 interface CalculoResultadoAnual {
   impuesto: number;
@@ -186,7 +186,7 @@ export default function DemoRegest() {
                   </p>
                   <Button
                     className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white py-6 text-base font-semibold"
-                    onClick={() => window.open('https://wa.me/56912345678', '_blank')}
+                    onClick={() => window.open('https://wa.me/56982428895', '_blank')}
                   >
                     Solicitar versión completa
                     <ExternalLink className="ml-2 h-5 w-5" />
