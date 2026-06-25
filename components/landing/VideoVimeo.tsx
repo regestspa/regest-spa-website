@@ -1,18 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Play, Star } from "lucide-react";
-import { useState } from "react";
+import { Star } from "lucide-react";
 
 export function VideoVimeo() {
-  const [loaded, setLoaded] = useState(false);
-
   return (
     <section className="relative bg-black overflow-hidden py-24 px-4 sm:px-6 lg:px-8">
       {/* Ambient glow */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-orange-600/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-amber-500/8 rounded-full blur-[100px]" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-amber-500/10 rounded-full blur-[100px]" />
       </div>
 
       <div className="relative z-10 max-w-5xl mx-auto">
@@ -82,30 +79,21 @@ export function VideoVimeo() {
           transition={{ delay: 0.4, duration: 0.7 }}
           className="relative"
         >
-          {/* Glow ring around player */}
+          {/* Glow ring */}
           <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-orange-600/40 via-amber-500/20 to-orange-600/40 blur-md" />
 
-          <div className="relative rounded-2xl overflow-hidden bg-slate-900 shadow-2xl shadow-black/60">
-            {/* Play placeholder shown while iframe loads */}
-            {!loaded && (
-              <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-900">
-                <div className="w-16 h-16 rounded-full bg-orange-500/20 border border-orange-500/40 flex items-center justify-center animate-pulse">
-                  <Play className="w-7 h-7 text-orange-400 ml-1" />
-                </div>
-              </div>
-            )}
-
-            {/* 16:9 responsive wrapper */}
-            <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-              <iframe
-                src="https://player.vimeo.com/video/1204640680?badge=0&autopause=0&player_id=0&app_id=58479&color=f97316&title=0&byline=0&portrait=0"
-                className="absolute inset-0 w-full h-full"
-                allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
-                allowFullScreen
-                title="REGEST - Video Corporativo"
-                onLoad={() => setLoaded(true)}
-              />
-            </div>
+          {/* 16:9 responsive wrapper */}
+          <div
+            className="relative w-full rounded-2xl overflow-hidden bg-slate-900 shadow-2xl shadow-black/60"
+            style={{ paddingBottom: "56.25%" }}
+          >
+            <iframe
+              src="https://player.vimeo.com/video/1204640680?badge=0&autopause=0&player_id=0&app_id=58479&color=f97316&title=0&byline=0&portrait=0"
+              className="absolute inset-0 w-full h-full border-0"
+              allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
+              allowFullScreen
+              title="REGEST - Video Corporativo"
+            />
           </div>
         </motion.div>
 
