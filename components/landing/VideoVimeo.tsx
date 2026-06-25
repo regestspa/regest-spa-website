@@ -2,11 +2,10 @@
 
 import { motion } from "framer-motion";
 import { Play, Star } from "lucide-react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 export function VideoVimeo() {
   const [loaded, setLoaded] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   return (
     <section className="relative bg-black overflow-hidden py-24 px-4 sm:px-6 lg:px-8">
@@ -99,7 +98,6 @@ export function VideoVimeo() {
             {/* 16:9 responsive wrapper */}
             <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
               <iframe
-                ref={iframeRef}
                 src="https://player.vimeo.com/video/1204640680?badge=0&autopause=0&player_id=0&app_id=58479&color=f97316&title=0&byline=0&portrait=0"
                 className="absolute inset-0 w-full h-full"
                 allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
