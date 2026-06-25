@@ -1,7 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Star } from "lucide-react";
+import { Star, ExternalLink } from "lucide-react";
+
+const VIMEO_ID = "1204640680";
 
 export function VideoVimeo() {
   return (
@@ -88,13 +90,33 @@ export function VideoVimeo() {
             style={{ paddingBottom: "56.25%" }}
           >
             <iframe
-              src="https://player.vimeo.com/video/1204640680?badge=0&autopause=0&player_id=0&app_id=58479&color=f97316&title=0&byline=0&portrait=0"
+              src={`https://player.vimeo.com/video/${VIMEO_ID}?badge=0&autopause=0&player_id=0&app_id=58479&color=f97316&title=0&byline=0&portrait=0&dnt=0`}
               className="absolute inset-0 w-full h-full border-0"
               allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
               allowFullScreen
               title="REGEST - Video Corporativo"
+              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
             />
           </div>
+        </motion.div>
+
+        {/* Fallback direct link */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.6 }}
+          className="mt-4 text-center"
+        >
+          <a
+            href={`https://vimeo.com/${VIMEO_ID}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-orange-400 transition-colors"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            Ver video en Vimeo
+          </a>
         </motion.div>
 
         {/* Bottom stat strip */}
@@ -103,7 +125,7 @@ export function VideoVimeo() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.55 }}
-          className="mt-12 grid grid-cols-3 gap-4 sm:gap-8"
+          className="mt-10 grid grid-cols-3 gap-4 sm:gap-8"
         >
           {[
             { value: "+6 años", label: "de experiencia" },
