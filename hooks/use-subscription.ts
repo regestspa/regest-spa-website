@@ -23,6 +23,9 @@ interface UserSubscription {
   is_trial: boolean;
   trial_start_date: string | null;
   trial_end_date: string | null;
+  payment_status: string;
+  payment_reference: string | null;
+  paid_at: string | null;
 }
 
 interface AccessCode {
@@ -62,6 +65,9 @@ export function useSubscription() {
           is_trial,
           trial_start_date,
           trial_end_date,
+          payment_status,
+          payment_reference,
+          paid_at,
           plan:subscription_plans(
             id,
             name,
@@ -107,26 +113,26 @@ export function useSubscription() {
   const isTrialActive = () => {
     if (!subscription || !subscription.is_trial) return false;
     if (!subscription.trial_end_date) return false;
+    return new Date() < new Date(subscription.trial_end_date);
+  };
 
-    const now = new Date();
-    const trialEnd = new Date(subscription.trial_end_date);
-
-    return now < trialEnd;
+  // A user has paid if payment_status === 'paid'
+  const hasPaid = () => {
+    if (!subscription) return false;
+    return subscription.payment_status === "paid";
   };
 
   const hasRegestbotAccess = () => {
     if (!subscription) return false;
-
     if (isTrialActive()) return true;
-
+    if (!hasPaid()) return false;
     return subscription.plan.regestbot_access;
   };
 
   const hasCalculatorAccess = () => {
     if (!subscription) return false;
-
     if (isTrialActive()) return true;
-
+    if (!hasPaid()) return false;
     return subscription.plan.calculator_access;
   };
 
@@ -137,12 +143,8 @@ export function useSubscription() {
 
   const getDaysRemaining = () => {
     if (!subscription || !subscription.trial_end_date) return 0;
-
-    const now = new Date();
-    const trialEnd = new Date(subscription.trial_end_date);
-    const diff = trialEnd.getTime() - now.getTime();
+    const diff = new Date(subscription.trial_end_date).getTime() - Date.now();
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-
     return days > 0 ? days : 0;
   };
 
@@ -154,6 +156,7 @@ export function useSubscription() {
     hasCalculatorAccess,
     isPremium,
     isTrialActive,
+    hasPaid,
     getDaysRemaining,
     refetch: fetchSubscription,
     refetchCode: fetchAccessCode,
