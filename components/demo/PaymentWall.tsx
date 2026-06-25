@@ -1,24 +1,21 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
-import { Lock, Check, CreditCard, MessageCircle, Zap, Shield, Clock } from "lucide-react";
+import { Lock, Check, CreditCard, MessageCircle, Zap, Shield, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface PaymentWallProps {
   feature: "calculator" | "regestbot" | "both";
-  onPaymentSimulated?: () => void;
+  returnPath?: string;
 }
 
 const WHATSAPP_URL = "https://wa.me/56982428895";
 
 const premiumFeatures = [
-  "Calculadora Anual IGC completa con todos los tramos",
+  "Calculadora Anual IGC con todos los tramos",
   "REGESTBOT con respuestas ilimitadas",
   "Exportación de resultados en PDF",
   "Historial de consultas guardado",
@@ -26,9 +23,8 @@ const premiumFeatures = [
   "Soporte dedicado 24/7",
 ];
 
-export function PaymentWall({ feature, onPaymentSimulated }: PaymentWallProps) {
-  const { user } = useAuth();
-  const [simulating, setSimulating] = useState(false);
+export function PaymentWall({ feature, returnPath = "/demo-regest" }: PaymentWallProps) {
+  const router = useRouter();
 
   const featureLabel =
     feature === "calculator"
@@ -37,52 +33,8 @@ export function PaymentWall({ feature, onPaymentSimulated }: PaymentWallProps) {
       ? "el REGESTBOT"
       : "la Calculadora y el REGESTBOT";
 
-  // Simulate Flow/Webpay payment: marks subscription as paid in DB
-  const handleSimulatePayment = async () => {
-    if (!user) return;
-    setSimulating(true);
-    try {
-      // Simulate a payment reference as Flow/Webpay would return
-      const fakeRef = `FLOW-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-
-      // Get Premium plan id
-      const { data: plan } = await supabase
-        .from("subscription_plans")
-        .select("id")
-        .eq("name", "Premium")
-        .single();
-
-      if (!plan) throw new Error("Plan Premium no encontrado");
-
-      // Upsert subscription to Premium + paid
-      const { error } = await supabase
-        .from("user_subscriptions")
-        .upsert(
-          {
-            user_id: user.id,
-            plan_id: plan.id,
-            status: "active",
-            payment_status: "paid",
-            payment_reference: fakeRef,
-            paid_at: new Date().toISOString(),
-            is_trial: false,
-            started_at: new Date().toISOString(),
-          },
-          { onConflict: "user_id" }
-        );
-
-      if (error) throw error;
-
-      toast.success("Pago procesado exitosamente", {
-        description: `Referencia: ${fakeRef}. Acceso Premium activado.`,
-      });
-
-      onPaymentSimulated?.();
-    } catch (err: any) {
-      toast.error("Error al procesar el pago", { description: err.message });
-    } finally {
-      setSimulating(false);
-    }
+  const handlePay = () => {
+    router.push(`/pago?plan=premium&return=${encodeURIComponent(returnPath)}`);
   };
 
   return (
@@ -136,22 +88,14 @@ export function PaymentWall({ feature, onPaymentSimulated }: PaymentWallProps) {
           </CardContent>
         </Card>
 
-        {/* Payment simulation (Flow/Webpay) */}
         <div className="space-y-3">
-          <div className="p-3 rounded-lg bg-blue-950/30 border border-blue-500/20 flex items-start gap-2">
-            <Clock className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
-            <p className="text-xs text-blue-300 leading-relaxed">
-              <span className="font-semibold">Pasarela de pago simulada.</span> En producción, este botón redirige a Flow/Webpay. Al confirmar el pago, nuestro sistema actualiza tu estado automáticamente.
-            </p>
-          </div>
-
           <Button
-            onClick={handleSimulatePayment}
-            disabled={simulating}
+            onClick={handlePay}
             className="w-full bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-700 hover:to-amber-600 text-white font-semibold py-6 text-base shadow-lg shadow-orange-500/20"
           >
             <CreditCard className="w-5 h-5 mr-2" />
-            {simulating ? "Procesando pago..." : "Pagar con Flow / Webpay (Simulado)"}
+            Ir al pago — Flow / Webpay
+            <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
 
           <Button

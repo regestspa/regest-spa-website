@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Check, Sparkles, ArrowLeft, AlertCircle, Edit2, Copy, RefreshCw, Clock, MessageCircle } from "lucide-react";
+import { Check, Sparkles, ArrowLeft, CircleAlert as AlertCircle, CreditCard as Edit2, Copy, RefreshCw, Clock, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -100,34 +100,28 @@ export default function SubscriptionPage() {
     }
   };
 
-  const handleUpgrade = async (planId: string) => {
-    try {
-      const { error } = await supabase
-        .from("user_subscriptions")
-        .update({
-          plan_id: planId,
-          status: "active",
-          is_trial: false,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("user_id", user?.id);
+  const handleUpgrade = (planId: string) => {
+    const targetPlan = plans.find((p) => p.id === planId);
+    if (!targetPlan) return;
 
-      if (error) throw error;
-
-      toast({
-        title: "Suscripción actualizada",
-        description: "Tu plan ha sido actualizado exitosamente.",
-      });
-
-      refetch();
-    } catch (error) {
-      console.error("Error upgrading subscription:", error);
-      toast({
-        title: "Error",
-        description: "No se pudo actualizar tu suscripción.",
-        variant: "destructive",
-      });
+    if (targetPlan.name === "Premium") {
+      router.push(`/pago?plan=premium&return=${encodeURIComponent("/suscripcion")}`);
+      return;
     }
+
+    // Downgrade to Free — no payment required
+    supabase
+      .from("user_subscriptions")
+      .update({ plan_id: planId, status: "active", is_trial: false, payment_status: "paid" })
+      .eq("user_id", user?.id)
+      .then(({ error }) => {
+        if (error) {
+          toast({ title: "Error", description: "No se pudo cambiar el plan.", variant: "destructive" });
+        } else {
+          toast({ title: "Plan actualizado", description: "Ahora estás en el plan Free." });
+          refetch();
+        }
+      });
   };
 
   const handleRegenerateCode = async () => {

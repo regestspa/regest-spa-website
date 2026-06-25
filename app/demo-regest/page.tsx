@@ -69,7 +69,7 @@ const chatAnswers: Record<string, string> = {
 export default function DemoRegestPage() {
   const router = useRouter();
   const { user, signOut } = useAuth();
-  const { hasCalculatorAccess, hasRegestbotAccess, hasPaid, isPremium, isTrialActive, subscription, loading: subLoading, refetch } = useSubscription();
+  const { hasCalculatorAccess, hasRegestbotAccess, isPremium, isTrialActive, loading: subLoading } = useSubscription();
 
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [rentaAnual, setRentaAnual] = useState("");
@@ -312,7 +312,7 @@ export default function DemoRegestPage() {
                         )}
                       </div>
                     ) : (
-                      <PaymentWall feature="calculator" onPaymentSimulated={refetch} />
+                      <PaymentWall feature="calculator" returnPath="/demo-regest" />
                     )}
                   </CardContent>
                 </Card>
@@ -390,7 +390,7 @@ export default function DemoRegestPage() {
                         </Button>
                       </div>
                     ) : (
-                      <PaymentWall feature="regestbot" onPaymentSimulated={refetch} />
+                      <PaymentWall feature="regestbot" returnPath="/demo-regest" />
                     )}
                   </CardContent>
                 </Card>
