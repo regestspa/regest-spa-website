@@ -169,8 +169,8 @@ export function Navbar() {
         onClose={() => setShowAuthModal(false)}
         onSuccess={() => {
           setShowAuthModal(false);
-          // After login re-evaluate access
-          handleDemoClick();
+          // Navigate to demo after login — the page itself enforces subscription check
+          router.push("/demo-regest");
         }}
       />
     </>
