@@ -1,7 +1,6 @@
 import { Navbar } from "@/components/landing/Navbar";
 import { VideoHero } from "@/components/landing/VideoHero";
 import { ValoresSection } from "@/components/landing/ValoresSection";
-import { VideoVimeo } from "@/components/landing/VideoVimeo";
 import { HistoriaSection } from "@/components/landing/HistoriaSection";
 import { Servicios } from "@/components/landing/Servicios";
 import { ProductosORO } from "@/components/landing/ProductosORO";
@@ -15,7 +14,6 @@ export default function Home() {
       <Navbar />
       <VideoHero />
       <ValoresSection />
-      <VideoVimeo />
       <HistoriaSection />
       <Servicios />
       <ProductosORO />
